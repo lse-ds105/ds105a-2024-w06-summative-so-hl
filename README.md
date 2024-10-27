@@ -2,43 +2,42 @@
 ### "Is London really as rainy as the movies make it out to be?"
 
 **About**  
-This project conducts data analysis on rain and indicators of rain in London, and compared to other countries. 
-
+This project conducts data analysis on rain and indicators of rain in London, and compared to other countries.  
 
 
 **Data Sources**  
-OpenMeteo's API was used due to its (1) high-resolution data (2) detailed documentation (3) accessibility. 
+OpenMeteo's API was used due to its (1) high-resolution data (2) detailed documentation (3) accessibility.  
 
 world_cities.csv was also used to obtain the latitude and longitude of other cities. 
 
 
 **Points of consideration**
-* Time period: 2019-2023 (data from the last 5 years)
+* Time period: 2019-2023 (data from the last 5 years)  
 *Rationale*: Sufficient data to analyse trends, and recent enough to be indicative of London's raininess in recent years 
 
 * Regional analysis: 
-United States (North America), Mexico (North America), Brazil (South America), Nigeria (Africa), Egypt (Africa), Germany (Europe), India (Asia), Japan (Asia), Singapore (Asia), Australia (Oceania)
+United States (North America), Mexico (North America), Brazil (South America), Nigeria (Africa), Egypt (Africa), Germany (Europe), India (Asia), Japan (Asia), Singapore (Asia), Australia (Oceania)  
 *Rationale*: 10 other countries were chosen. There is a significant diversity in climates and geographical contexts, thus providing a comprehensive basis for comparison in this data analysis project. 
 
 * Measure of raininess:
-The 2 key metrics are 
-(1) Amount of rainfall 
+The 2 key metrics are  
+(1) Amount of rainfall  
 (2) Frequency of rainy days (provided time period for comparison is greater than 1 day)
 
-* Variables of weather
-Actual rain parameters: precipitation (rain, showers, snow), rain, showers (intermittent rainfall)
-Predictors/indicators of rain: precipitation probability, cloud cover total, dewpoint (moisture in air), relative humidity
+* Variables of weather:  
+Actual rain parameters: precipitation (rain, showers, snow), rain, showers (intermittent rainfall)  
+Predictors/indicators of rain: precipitation probability, cloud cover total, dewpoint (moisture in air), relative humidity  
 
-**Data Analysis**
+**Data Analysis**  
 The following was analysed. The parameters that will be used from the OpenMeteo API are bracketed in italics. 
 
-(1) Analysing London
+(1) Analysing London  
 * Rainiest day (*rain*)
 * Rainiest month (*rain*)
 * Rainiest season (*rain*)
 * Rainiest year (*rain*)
 
-(2) Comparisons between London and set of other countries 
+(2) Comparisons between London and set of other countries   
 (a) Actual rain parameters
 * Amount of rainfall (*rain*)
 * Frequency of rainy days (*rain*)
@@ -56,7 +55,7 @@ The following was analysed. The parameters that will be used from the OpenMeteo 
 **How to program works (and expected outputs)**
 
 
-**Author**
+**Author**  
 Vienna (So Hoi Ling), Year 1 LSE Econs student
 
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/16Ytx_fz)
