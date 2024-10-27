@@ -3,14 +3,13 @@
 
 **About**  
 This project conducts data analysis on rain and indicators of rain in London, and compared to other countries.  
-
-
+<br><br>
 
 **Data Sources**  
 OpenMeteo's API was used due to its (1) high-resolution data (2) detailed documentation (3) accessibility.  
 
 world_cities.csv was also used to obtain the latitude and longitude of other cities. 
-
+<br><br>
 
 **Points of consideration**
 * Time period: 2019-2023 (data from the last 5 years)  
@@ -28,6 +27,7 @@ The 2 key metrics are
 * Variables of weather:  
 Actual rain parameters: precipitation (rain, showers, snow), rain, showers (intermittent rainfall)  
 Predictors/indicators of rain: precipitation probability, cloud cover total, dewpoint (moisture in air), relative humidity  
+<br><br>
 
 **Data Analysis**  
 The following was analysed. The parameters that will be used from the OpenMeteo API are bracketed in italics. 
@@ -52,9 +52,10 @@ The following was analysed. The parameters that will be used from the OpenMeteo 
 (b) Predictors/indicators of rain
 * Graphical analysis to compare predictors of rain
 * What is the best predictor of rain?
+<br><br>
 
 **How to program works (and expected outputs)**
-
+<br><br>
 
 **Author**  
 Vienna (So Hoi Ling), Year 1 LSE Econs student
