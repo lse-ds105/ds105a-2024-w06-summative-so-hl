@@ -6,7 +6,7 @@ This project conducts data analysis on rain and indicators of rain in London, an
 <br><br>
 
 ### Data Sources  
-**OpenMeteo's API** was used due to its (1) high-resolution data (2) detailed documentation (3) accessibility.  
+**OpenMeteo's API** [https://open-meteo.com/] was used due to its (1) high-resolution data (2) detailed documentation (3) accessibility.  
 
 world_cities.csv was also used to obtain the latitude and longitude of other cities. 
 <br><br>
