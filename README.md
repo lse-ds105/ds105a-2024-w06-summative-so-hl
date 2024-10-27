@@ -1,11 +1,12 @@
 # W06 Summative
 ### "Is London really as rainy as the movies make it out to be?"
 
-**About**
+**About**  
 This project conducts data analysis on rain and indicators of rain in London, and compared to other countries. 
 
 
-**Data Sources**
+
+**Data Sources**  
 OpenMeteo's API was used due to its (1) high-resolution data (2) detailed documentation (3) accessibility. 
 
 world_cities.csv was also used to obtain the latitude and longitude of other cities. 
