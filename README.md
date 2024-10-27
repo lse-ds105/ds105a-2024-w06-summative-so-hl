@@ -1,6 +1,5 @@
 # W06 Summative
 ## "Is London really as rainy as the movies make it out to be?"
-<br><br>
 
 ### About  
 This project conducts data analysis on rain and indicators of rain in London, and compared to other countries.  
