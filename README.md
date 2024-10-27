@@ -2,7 +2,7 @@
 ## "Is London really as rainy as the movies make it out to be?"
 
 ### About  
-This project conducts data analysis on rain and indicators of rain in London, and compared to other countries.  
+This project conducts data analysis on rain and indicators of rain in London, and as compared to other countries.  
 <br><br>
 
 ### Data Sources  
