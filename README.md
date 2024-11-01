@@ -20,19 +20,20 @@ United States (North America), Mexico (North America), Brazil (South America), N
 *Rationale*: 10 other countries were chosen. There is a significant diversity in climates and geographical contexts, thus providing a comprehensive basis for comparison in this data analysis project. 
 
 * **Measure of raininess**:
-The 2 key metrics are  
-(1) Amount of rainfall  
-(2) Frequency of rainy days (provided time period for comparison is greater than 1 day)
+The 4 key metrics are  
+(1) Amount of rain  
+(2) Number of rainy days per month and per season  
+(3) Number of hours of rain per month and per season  
+(4) Number of hours of rain per month and per season (during the day)
 
-* **Variables of weather**:  
-Actual rain parameters: precipitation (rain, showers, snow), rain, showers (intermittent rainfall)  
-Predictors/indicators of rain: precipitation probability, cloud cover total, dewpoint (moisture in air), relative humidity  
+* **Parameters used**
+rain_sum (daily), rain(hourly)
 <br><br>
 
 ### Data Analysis  
 The following was analysed. The parameters that will be used from the OpenMeteo API are bracketed in italics. 
 
-**(1) Analysing London**  
+"""**(1) Analysing London**  
 * Rainiest day (*rain*)
 * Rainiest month (*rain*)
 * Rainiest season (*rain*)
@@ -51,11 +52,14 @@ The following was analysed. The parameters that will be used from the OpenMeteo 
 
 **(b) Predictors/indicators of rain**
 * Graphical analysis to compare predictors of rain
-* What is the best predictor of rain?
+* What is the best predictor of rain?"""
 <br><br>
 
 ### How to program works (and expected outputs)
 <br><br>
+
+### Reformatting
+Used black. 
 
 ### Author  
 Vienna (So Hoi Ling), Year 1 LSE Econs student
