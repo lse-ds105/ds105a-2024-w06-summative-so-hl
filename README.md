@@ -59,7 +59,7 @@ The following was analysed. The parameters that will be used from the OpenMeteo 
 <br><br>
 
 ### Reformatting
-Used black. 
+Black (https://black.readthedocs.io/en/stable/) was used to reformat the python files.
 
 ### Author  
 Vienna (So Hoi Ling), Year 1 LSE Econs student
