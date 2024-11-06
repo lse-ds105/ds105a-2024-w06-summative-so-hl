@@ -4,7 +4,7 @@
 
 ## **1. About**
 
-This project collects and analyses rainfall data globally to compare trends between London and other cities. The analysis and visualisations hihglight patterns and anomalies in rainfall distribution. 
+This project collects and analyses rainfall data globally to compare trends between London and other cities. The analysis and visualisations highlight patterns and anomalies in rainfall distribution. 
 
 
 ## **2. Installation**
@@ -25,7 +25,7 @@ python collect_data.py ../data/world_cities.csv --london_daily_output ../data/lo
 ## **4. Project Structure**
 - `data_collection.py`: Collects rainfall data from [OpenMeTeo](https://open-meteo.com/)
 - `analysis.ipynb`: Main Jupyter notebook for data analysis and visualisation
-- `my_functions.py`: Script for all functons to be imported into Jupyter notebook
+- `my_functions.py`: Script for all functions to be imported into Jupyter notebook
 - `requirements.txt`: Text file containing all requirements necessary to run the project
 - `data/`: Directory where collected data is stored as CSV files and additional data required for analysis is stored
 - `README.md`: Project documentation
@@ -43,7 +43,7 @@ python collect_data.py ../data/world_cities.csv --london_daily_output ../data/lo
 * London's daily, monthly, and seasonal rainfall against the global average.
 * London's rainfall against the average rainfall of cities grouped by their geographic region (Africa, Asia, Europe, North America, Oceania, South America)
 
-The **preliminary analysis** focused on visualising the data through plots. 
+The **preliminary analysis** focused on visualising the data through plots.   
 a. London vs. Global Average  
 - Daily and Monthly Comparisons: To visually explore the differences in rainfall patterns between London and the global average, line graphs were used. These graphs clearly illustrate the trends in daily and monthly rainfall, highlighting how London’s rainfall varies compared to the global average over time.  
 - Seasonal Comparison: For the seasonal analysis, a bar graph was chosen to better represent the differences in rainfall for each season. Bar graphs are useful in highlighting specific differences in rainfall volumes across seasons, making it easier to compare London's seasonal rainfall to the global average.
@@ -62,27 +62,27 @@ For the regional analysis, the median rainfall for each region was also calculat
 * **Time period**: 2019-2023 (data from the last 5 years)  
 *Rationale*: Sufficient data to analyse trends, and recent enough to be indicative of London's raininess in recent years 
 
-* **Global analysis**: 
+* **Global analysis**:   
 40 cities, with a range from each region
 *Rationale*: This allows for significant diversity in climates and geographical contexts, thus providing a comprehensive basis for comparison in this data analysis project. 
 
-* **Measure of raininess**:
+* **Measure of raininess**:  
 **Amount of rain (mm)**  
 This was identified as the key metric to define raininess in a city. 
 
-* **Parameters used**
+* **Parameters used**  
 rain_sum (daily rainfall)
 
-* **Data Format**
-CSV was used to store the daily data, as it is more compatabile than JSON for working with pandas.
+* **Data Format**   
+CSV was used to store the daily data, as it is more compatible than JSON for working with pandas.
 
-* **Reformatting**
+* **Reformatting**  
 [Black](https://black.readthedocs.io/en/stable/) was used to reformat the python files.
 The VS Code reformatter was used to reformat the jupyter notebooks.
 
 
-## **8. Expected Outputs and Results**
-- CSV files ointaining daily rainfall data for London and other cities
+## **8. Expected Outputs and Results**
+- CSV files containing daily rainfall data for London and other cities
 - Plots and databases comparing daily, monthly and seasonal rainfall trends in London versus other cities (the average city globally and the average city by region)
 - Analysis of median rainfall and rankings of median rainfall
 
