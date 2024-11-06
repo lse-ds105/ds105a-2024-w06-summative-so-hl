@@ -1,4 +1,4 @@
-# TO RUN: python collect_data.py ../data/world_cities.csv --output ../data/all_data.json --london_output london_rain.json
+# TO RUN: python collect_data.py ../data/world_cities.csv --london_daily_output ../data/london_daily_rain.csv --london_hourly_output ../data/london_hourly_rain.csv --all_daily_output ../data/all_daily_rain.csv --all_hourly_output ../data/all_hourly_rain.csv
 
 import argparse
 import json
@@ -42,6 +42,13 @@ def collect_data(coord_file):
 
     return results_all
 
+
+def process_city_data(city, data, data_type, container):
+    df = pd.DataFrame(data[data_type])
+    df["city"] = city
+    container.append(df)
+
+
 def main():
     # Argument parsing
     parser = argparse.ArgumentParser(
@@ -77,7 +84,6 @@ def main():
 
     # Save London's daily data to CSV
     london_daily_df = pd.DataFrame(results_all["GB,London"]["daily"])
-    
     london_daily_df.to_csv(args.london_daily_output, index=False)
     print(f"London's daily data saved to {args.london_daily_output}")
 
@@ -86,35 +92,27 @@ def main():
     london_hourly_df.to_csv(args.london_hourly_output, index=False)
     print(f"London's hourly data saved to {args.london_hourly_output}")
 
-    # Collect daily data for all cities to DataFrame
-    daily_dataframes = []
+    # Initialise empty lists to store cities dataframes
+    cities_daily = []
+    cities_hourly = []
+
+    # Loop through each city in results_all
     for city, data in results_all.items():
-        daily_df = pd.DataFrame(data["daily"])
-        daily_df["city"] = city
-        daily_dataframes.append(daily_df)
-    all_daily_df = pd.concat(daily_dataframes, ignore_index=True)
+        if city == "GB,London":
+            continue
+        process_city_data(city, data, "daily", cities_daily)
+        process_city_data(city, data, "hourly", cities_hourly)
 
-    # Pivot DataFrame to have a separate column for each city's rainfall
-    all_daily_pivot = all_daily_df.pivot(index="time", columns="city", values="rain_sum").reset_index()
-
-    # Save daily data for all cities to CSV
-    all_daily_pivot.to_csv(args.all_daily_output, index=False)
+    # Save all cities' daily data to CSV
+    cities_daily_df = pd.concat(cities_daily, ignore_index=True)
+    cities_daily_df.to_csv(args.all_daily_output, index=False)
     print(f"All cities' daily data saved to {args.all_daily_output}")
 
-    # Collect hourly data for all cities to DataFrame
-    hourly_dataframes = []
-    for city, data in results_all.items():
-        hourly_df = pd.DataFrame(data["hourly"])
-        hourly_df["city"] = city
-        hourly_dataframes.append(hourly_df)
-    all_hourly_df = pd.concat(hourly_dataframes, ignore_index=True)
-
-    # Pivot DataFrame to have a separate column for each city's rainfall
-    all_hourly_pivot = all_hourly_df.pivot(index="time", columns="city", values="rain").reset_index()
-
-    # Save hourly data for all cities to CSV
-    all_hourly_pivot.to_csv(args.all_hourly_output, index=False)
+    # Save all cities' hourly data to CSV
+    cities_hourly_df = pd.concat(cities_hourly, ignore_index=True)
+    cities_hourly_df.to_csv(args.all_hourly_output, index=False)
     print(f"All cities' hourly data saved to {args.all_hourly_output}")
+
 
 if __name__ == "__main__":
     main()

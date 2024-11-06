@@ -1,142 +1,347 @@
+import json
 import csv
-import requests
-import calendar
 import pandas as pd
+from lets_plot import *
+import ipywidgets as widgets
+from IPython.display import display
 
-# Define constants
-NUMBER_YEARS = 5
+# Load cities to region mapping
+with open("../data/cities_config.json", "r") as file:
+    cities_config = json.load(file)
 
 
-# Function to extract coordinates
 def extract_coord(file, cities_all_dict, coord_all_dict):
+    """
+    FUNCTION:
+    Extracts coordinates of cities from a CSV file into a dictionary mapped by region.
+    -------------------------------------------------------------------------------------
+    PARAMETERS:
+    file : str
+        Path to CSV containing city coordinates.
+        CSV file should contain city name, region name, lattiude, longitude.
+    cities_all_dict: dict
+        Dictionary mapping regions to lists of cities.
+    coord_all_dict: dict
+        Dictionary to be updated with city coordinates.
+    ----------------------------------------------------------------------
+    RETURNS:
+    dict
+        The updated coord_all_dict with coordinates added for cities found in the input CSV file.
+    """
+    # Read CSV file and create city_coords dictionary
     with open(file, "r") as file:
         reader = csv.reader(file)
         city_coords = {f"{row[0]},{row[1]}": [row[2], row[3]] for row in reader}
 
-        for region, cities in cities_all_dict.items():
-            if region not in coord_all_dict:
-                coord_all_dict[region] = {}
+    # Update coord_all_dict
+    coord_all_dict = {
+        region: {city: city_coords[city] for city in cities if city in city_coords}
+        for region, cities in cities_all_dict.items()
+    }
 
-            for city in cities:
-                if city in city_coords:
-                    coord_all_dict[region][city] = city_coords[city]
     return coord_all_dict
 
 
-# Function to retrieve daily and hourly rain data
-def get_rain_data(latitude, longitude):
-    # URL format(day): https://archive-api.open-meteo.com/v1/archive?latitude=-25&longitude=135&start_date=2019-01-01&end_date=2023-12-31&daily=rain_sum
-    # URL format(hourly): https://archive-api.open-meteo.com/v1/archive?latitude=51.5085&longitude=-0.1257&start_date=2024-10-12&end_date=2024-10-26&hourly=rain
-    start_url = "https://archive-api.open-meteo.com/v1/archive?"
-    param_lat_long = "latitude=" + str(latitude) + "&longitude=" + str(longitude)
-    time_period = "&start_date=2019-01-01&end_date=2023-12-31"
-    end_url = {"daily": "&daily=rain_sum", "hourly": "&hourly=rain"}
-
-    urls = {}
-    responses = {}
-
-    for key, end in end_url.items():
-        urls[key] = start_url + param_lat_long + time_period + end
-        responses[key] = requests.get(urls[key])
-
-    rain_data_daily = responses["daily"].json()
-    rain_data_hourly = responses["hourly"].json()
-
-    return rain_data_daily, rain_data_hourly
+def rename_columns(df):
+    """
+    FUNCTION:
+    Renames columns in DataFrame for clarity and consistency.
+    --------------------------------------------------------
+    PARAMETERS:
+    df : pandas.DataFrame
+        DataFrame whose columns are to be renamed.
+        DataFrame should contain columns "rain_sum" and "time".
+    --------------------------------------------------------
+    RETURNS:
+    None
+        The DataFrame is modified and no value is returned.
+    """
+    df.rename(columns={"rain_sum": "rain", "time": "date"}, inplace=True)
 
 
-# Function to take the average of values in dictionary
-def ave_rain(data, CONSTANT):
-    return {month: round(rain / CONSTANT, 1) for month, rain in data.items()}
+def group_month(df):
+    """
+    FUNCTION:
+    Groups DataFrame by month and city, summing the monthly amount of rainfall in each city.
+    ----------------------------------------------------------------------------------------
+    PARAMETERS:
+    df : pandas.DataFrame
+        DataFrame to be regrouped based on months and cities.
+        DataFrame should contain at least "date" and "rain" columns.
+    --------------------------------------------------------------
+    RETURNS:
+    pandas.DataFrame
+        New DataFrame with columns "month", "city" and "rain",
+        where "rain" contains total rainfall summed for each city per month.
+    """
+    df["month"] = df["date"].dt.to_period("M")
+    monthly_df = df.groupby(["month", "city"])["rain"].sum().reset_index()
+    monthly_df["date"] = monthly_df["month"].dt.to_timestamp()
+    return monthly_df.drop(columns=["month"])
 
 
-# Function to take average of periodic rainfall
-def periodic_rain_amt(time, rain_sum, month_true):
-    # Initialise empty dictionary
-    periodic_rain_sum = {}
-
-    # Group by month (separate years)
-    for date, rain in zip(time, rain_sum):
-        if month_true:
-            date = date.split("-")[1]
-
-        if date not in periodic_rain_sum:
-            periodic_rain_sum[date] = rain
-        else:
-            periodic_rain_sum[date] += rain
-
-    # Take the average
-    periodic_rain_ave = ave_rain(periodic_rain_sum, NUMBER_YEARS)
-
-    # Convert month numbers into words
-    if month_true:
-        periodic_rain_ave = {
-            calendar.month_name[int(month)]: amount
-            for month, amount in periodic_rain_sum.items()
-        }
-
-    return periodic_rain_ave
+def map_region(city):
+    """
+    FUNCTION:
+    Maps a city to its corresponding region.
+    ----------------------------------------
+    PARAMETERS:
+    city : str
+        Name of city to be mapped to its region.
+    -------------------------------------------
+    RETURNS:
+    str
+        Region associated with city.
+    """
+    for region, cities in cities_config.items():
+        if city in cities:
+            return region
 
 
-# Function to find the sum of values of other cities
-def add_cities(data):
-    save_dict = {}
-    for rain in data.values():
-        for time, values in rain.items():
-            if time not in save_dict:
-                save_dict[time] = values
-            else:
-                save_dict[time] += values
-    return save_dict
+# Function to calculate average rainfall overall
+def calculate_average_rainfall(df, frequency="D"):
+    """
+    FUNCTION:
+    Calculates average rainfall from DataFrame by
+    (1) grouping DataFrame by the specified frequency and
+    (2) computing average rainfall for the grouped entries
+    and creates a new DataFrame with average rainfall per specified frequency.
+    --------------------------------------------------------------------------
+    PARAMETERS:
+    df : pandas.DataFrame
+        DataFrame containing "date" and "rain" columns.
+    frequency : str, optional
+        "D" for daily, "M" for monthly.
+        "D" is set as default.
+    --------------------------
+    RETURNS:
+    pandas.DataFrame
+        New DataFrame with columns "date" and "rain", where "rain" is average rainfall
+        per month or per day for each city.
+    """
+    # Group by specified frequency and calculate average rainfall
+    if frequency == "M":
+        average_df = group_month(df)
+        average_df = average_df.groupby(["date"])["rain"].mean().reset_index()
+    else:  # Default to daily
+        average_df = df.groupby("date")["rain"].mean().reset_index()
+
+    average_df["rain"] = average_df["rain"].round(2)
+    average_df["city"] = "Average city"
+    return average_df
 
 
-# Function to match city to region
-def match_city_to_region(city, cities_dict):
-    return next(region for region, cities in cities_dict.items() if city in cities)
+def plot_rainfall(london_df, cities_df, frequency="D"):
+    """
+    FUNCTION:
+    Plots rainfall data for London and other cities by
+    (1) combining rainfall data for London and other cities into a single DataFrame and
+    (2) generating a line plot showing rainfall over time.
+    ------------------------------------------------------
+    PARAMETERS:
+    london_df : pandas.DataFrame
+        DataFrame contianing rainfall data for London with "date" and "rain" columns.
+    cities_df : pandas.DataFrame
+        DataFrame containing rainfall data for other cities with "date" and "rain" columns.
+    frequency : str, optional
+        "D" for daily, "M" for monthly.
+        "D" is set as default.
+    --------------------------
+    RETURNS:
+    ggplot
+        ggplot object representing the line graph of rainfall data.
+    """
+    # Combine dataframes
+    df_combined = pd.concat([london_df, cities_df])
+
+    # Titles
+    if frequency == "M":
+        title = "Monthly Rainfall Comparison"
+    else:
+        title = "Daily Rainfall Comparison"
+
+    # Plot line graphs
+    plot = (
+        ggplot(df_combined, aes(x="date", y="rain", color="city"))
+        + geom_line(size=1.2)
+        + labs(title=title, x="Date", y="Rainfall (mm)", color="City")
+        + ggsize(3000, 800)
+        + theme(plot_title=element_text(size=20, face="bold", hjust=0.5))
+        + scale_x_datetime(format="%b %Y")
+    )
+    return plot
 
 
-# Function to average regional rain
-def ave_regional_rain(data):
-    regional_rain_ave = {}
-    for region, cities in data.items():
-        num_cities = len(cities)
-        daily_total = add_cities(cities)
-        regional_rain_ave[region] = ave_rain(daily_total, num_cities)
-    return regional_rain_ave
+def calculate_region_average_rainfall(df, frequency="D"):
+    """
+    FUNCTION:
+    Calculate the average rainfall by region from the provided DataFrame by
+    (1) mapping cities to their respective regions and
+    (2) computing the average rainfall for each region based on specified frequency (daily or monthly)
+    and creates a new DataFrame containing average rainfall values grouped by region and date.
+    ------------------------------------------------------------------------------------------
+    PARAMETERS:
+    df : pandas.DataFrame
+        DataFrame containing "date", "rain" and "city" columns
+    frequency : str, optional
+        "D" for daily, "M" for monthly.
+        "D" is set as default.
+    --------------------------
+    RETURNS:
+    pandas.DataFrame
+        DataFrame with columns "date", "region", and "rain".
+    """
+    # Map city to region
+    df["region"] = df["city"].apply(map_region)
+
+    # Group by specified frequency and region
+    if frequency == "M":
+        average_df = group_month(df)
+        average_df["region"] = average_df["city"].apply(map_region)
+        average_df = average_df.groupby(["region", "date"])["rain"].mean().reset_index()
+    else:  # Default to daily
+        average_df = df.groupby(["date", "region"])["rain"].mean().reset_index()
+
+    average_df["rain"] = average_df["rain"].round(2)
+    return average_df
 
 
-# Function to create dataframes for each reigon
-def create_region_dfs(ave_data, x_axis):
-    region_dfs = {}
-
-    for region, data in ave_data.items():
-        df = pd.DataFrame(
-            {
-                x_axis: list(data.keys()),
-                "Rainfall": list(data.values()),
-                "Source": "Average city in " + region,
-            }
+def plot_regional_rainfall(london_df, regions_df, selected_regions=None, frequency="D"):
+    """
+    FUNCTION:
+    Plots rainfall data for London and other cities by
+    (1) combining rainfall data for London and other cities based on regions into a single DataFrame and
+    (2) generating a line plot showing rainfall over time.
+    ------------------------------------------------------
+    PARAMETERS:
+    london_df : pandas.DataFrame
+        DataFrame contianing rainfall data for London with "date" and "rain" columns.
+    regions_df : pandas.DataFrame
+        DataFrame containing regional rainfall data for other cities with "date", "rain" and "region" columns.
+    frequency : str, optional
+        "D" for daily, "M" for monthly.
+        "D" is set as default.
+    --------------------------
+    RETURNS:
+    ggplot
+        ggplot object representing the line graph of rainfall data.
+    """
+    # Filter regions if specified and update city labels
+    if selected_regions:
+        regions_df = regions_df[regions_df["region"].isin(selected_regions)].assign(
+            city=regions_df["region"].apply(lambda r: f"Average city in {r}")
         )
+    else:
+        regions_df = regions_df.assign(
+            city=regions_df["region"].apply(lambda r: f"Average city in {r}")
+        )
+    df_combined = pd.concat([london_df, regions_df])
 
-        region_dfs[region] = df
-    return region_dfs
+    # Titles
+    if frequency == "M":
+        title = "Monthly Rainfall Comparison"
+    else:
+        title = "Daily Rainfall Comparison"
+
+    # Plot line graphs
+    plot = (
+        ggplot(df_combined, aes(x="date", y="rain", color="city"))
+        + geom_line(size=1.2)
+        + labs(
+            title=title, subtitle="By Region", x="Date", y="Rainfall (mm)", color="City"
+        )
+        + ggsize(3000, 800)
+        + theme(
+            plot_title=element_text(size=20, face="bold", hjust=0.5),
+            plot_subtitle=element_text(hjust=0.5),
+        )
+        + scale_x_datetime(format="%b %Y")
+    )
+    return plot
 
 
-# Function to calculate seasonal rain from monthly rain
-def calculate_seasonal_rain(monthly_rain):
+# Function to group by season
+def group_season(df, city=True):  # set "city" as default
+    """
+    FUNCTION:
+    Groups rainfall data by season and year, by city or region, and aggregates rainfall.
+    ------------------------------------------------------------------------------------
+    PARAMETERS:
+    df : pandas.DataFrame
+        DataFrame containing "date" and "rain" columns, with "city" or "region" columns.
+    city : bool, optional
+        if True: groups data by city; if False: groups data by region.
+        Default is set to True.
+    ----------------------------
+    RETURNS:
+    pandas.DataFrame
+        DataFrame with columns "season", "year" and either "city" or "region",
+        showing the total rainfall for each season.
+    """
     seasons = {
         "Winter": ["December", "January", "February"],
         "Spring": ["March", "April", "May"],
         "Summer": ["June", "July", "August"],
         "Autumn": ["September", "October", "November"],
     }
+    seasonal_df = df.copy()
+    seasonal_df["month"] = seasonal_df["date"].dt.strftime("%B")
+    seasonal_df["year"] = seasonal_df["date"].dt.strftime("%Y")
 
-    monthly_rain["Season"] = monthly_rain["Month"].apply(
+    # Determine season for each month
+    seasonal_df["season"] = seasonal_df["month"].apply(
         lambda month: next(
             (season for season, months in seasons.items() if month in months), None
         )
     )
-    seasonal_rain = (
-        monthly_rain.groupby(["Season", "Source"])["Rainfall"].sum().reset_index()
+
+    # Group by season, year, and city, then sum rainfall
+    group_cols = ["season", "year", "city"] if city else ["season", "year", "region"]
+    seasonal_df = seasonal_df.groupby(group_cols)["rain"].sum().reset_index()
+
+    # Define the order of seasons
+    season_order = ["Winter", "Spring", "Summer", "Autumn"]
+    seasonal_df["season"] = pd.Categorical(
+        seasonal_df["season"], categories=season_order, ordered=True
     )
-    return seasonal_rain
+
+    # Sort the DataFrame by year and then by season
+    seasonal_df.sort_values(by=["year", "season"], inplace=True)
+
+    # Combine seasons and years for plotting
+    seasonal_df["season_year"] = (
+        seasonal_df["season"].astype(str) + " " + seasonal_df["year"].astype(str)
+    )
+
+    # Reset index
+    seasonal_df.reset_index(drop=True, inplace=True)
+    return seasonal_df
+
+
+def raininess_rank(london, region):
+    """
+    FUNCTION:
+    Ranks cities in different regions by their median rainfall in descending order.
+    -------------------------------------------------------------------------------
+    PARAMETERS:
+    london : float
+        Median rainfall value for London
+    region : dict
+        Dictionary with regions as keys and median rainfall values as values. 
+    -------------------------------------------------------------------------
+    PRINTS:
+    Ranked list of regions by their median rainfall in descending order.
+    """
+    # Add London's median rainfall to the dictionary for ranking
+    region["London"] = london
+
+    # Sort by descending amount of rain
+    sorted_list = sorted(region.items(), key=lambda x: x[1], reverse=True)
+
+    # Print the ranking
+    print("Rainfall Ranking by Median Rainfall (in descending order):")
+    for rank, (region, median_rainfall) in enumerate(sorted_list, start=1):
+        if region == "London":
+            print(f"{rank}. London: {median_rainfall}mm")
+        else:
+            print(f"{rank}. Average city in {region}: {median_rainfall}mm")
