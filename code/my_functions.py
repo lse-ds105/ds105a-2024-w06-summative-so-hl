@@ -126,12 +126,12 @@ def calculate_average_rainfall(df, frequency="D"):
     else:  # Default to daily
         average_df = df.groupby("date")["rain"].mean().reset_index()
 
-    average_df["rain"] = average_df["rain"].round()
+    average_df["rain"] = average_df["rain"].round(2)
     average_df["city"] = "Average city"
     return average_df
 
 
-def plot_rainfall(london_df, cities_df, frequency="D"):
+def plot_rainfall(london_df, cities_df, title):
     """
     FUNCTION:
     Plots rainfall data for London and other cities by
@@ -143,9 +143,8 @@ def plot_rainfall(london_df, cities_df, frequency="D"):
         DataFrame contianing rainfall data for London with "date" and "rain" columns.
     cities_df : pandas.DataFrame
         DataFrame containing rainfall data for other cities with "date" and "rain" columns.
-    frequency : str, optional
-        "D" for daily, "M" for monthly.
-        "D" is set as default.
+    title : str
+        Title for graph.
     --------------------------
     RETURNS:
     ggplot
@@ -154,16 +153,10 @@ def plot_rainfall(london_df, cities_df, frequency="D"):
     # Combine dataframes
     df_combined = pd.concat([london_df, cities_df])
 
-    # Titles
-    if frequency == "M":
-        title = "Monthly Rainfall Comparison"
-    else:
-        title = "Daily Rainfall Comparison"
-
     # Plot line graphs
     plot = (
         ggplot(df_combined, aes(x="date", y="rain", color="city"))
-        + geom_line(size=1.2)
+        + geom_line(size=0.8, alpha=0.7)
         + labs(title=title, x="Date", y="Rainfall (mm)", color="City")
         + ggsize(3000, 800)
         + theme(plot_title=element_text(size=20, face="bold", hjust=0.5))
@@ -246,7 +239,7 @@ def plot_regional_rainfall(london_df, regions_df, selected_regions=None, frequen
     # Plot line graphs
     plot = (
         ggplot(df_combined, aes(x="date", y="rain", color="city"))
-        + geom_line(size=1.2)
+        + geom_line(size=0.8, alpha=0.7)
         + labs(
             title=title, subtitle="By Region", x="Date", y="Rainfall (mm)", color="City"
         )
@@ -298,6 +291,7 @@ def group_season(df, city=True):  # set "city" as default
     # Group by season, year, and city, then sum rainfall
     group_cols = ["season", "year", "city"] if city else ["season", "year", "region"]
     seasonal_df = seasonal_df.groupby(group_cols)["rain"].sum().reset_index()
+    seasonal_df["rain"] = seasonal_df["rain"].round(2)
 
     # Define the order of seasons
     season_order = ["Winter", "Spring", "Summer", "Autumn"]
@@ -327,7 +321,7 @@ def raininess_rank(london, region):
     london : float
         Median rainfall value for London
     region : dict
-        Dictionary with regions as keys and median rainfall values as values. 
+        Dictionary with regions as keys and median rainfall values as values.
     -------------------------------------------------------------------------
     PRINTS:
     Ranked list of regions by their median rainfall in descending order.
@@ -342,6 +336,6 @@ def raininess_rank(london, region):
     print("Rainfall Ranking by Median Rainfall (in descending order):")
     for rank, (region, median_rainfall) in enumerate(sorted_list, start=1):
         if region == "London":
-            print(f"{rank}. London: {median_rainfall}mm")
+            print(f"{rank}. London: {median_rainfall:.2f}mm")
         else:
-            print(f"{rank}. Average city in {region}: {median_rainfall}mm")
+            print(f"{rank}. Average city in {region}: {median_rainfall:.2f}mm")
