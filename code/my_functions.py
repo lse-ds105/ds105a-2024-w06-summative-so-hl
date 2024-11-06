@@ -126,7 +126,7 @@ def calculate_average_rainfall(df, frequency="D"):
     else:  # Default to daily
         average_df = df.groupby("date")["rain"].mean().reset_index()
 
-    average_df["rain"] = average_df["rain"].round(2)
+    average_df["rain"] = average_df["rain"].round()
     average_df["city"] = "Average city"
     return average_df
 
