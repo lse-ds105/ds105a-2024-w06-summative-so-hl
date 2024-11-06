@@ -32,7 +32,7 @@ python collect_data.py ../data/world_cities.csv --london_daily_output ../data/lo
 
 
 ## **5. Data Sources**  
-**OpenMeteo's API** [https://open-meteo.com/] was used due to its (1) high-resolution data (2) detailed documentation (3) accessibility.  
+**OpenMeteo's API** [OpenMeTeo](https://open-meteo.com/) was used due to its (1) high-resolution data (2) detailed documentation (3) accessibility.  
 
 `world_cities.csv` was also used to obtain the latitude and longitude of other cities. 
 `cities_config.json` was used to map cities to their respective regions.
@@ -77,7 +77,7 @@ rain_sum (daily rainfall)
 CSV was used to store the daily data, as it is more compatabile than JSON for working with pandas.
 
 * **Reformatting**
-Black [https://black.readthedocs.io/en/stable/] was used to reformat the python files.
+Black [black](https://black.readthedocs.io/en/stable/) was used to reformat the python files.
 The VS Code reformatter was used to reformat the jupyter notebooks.
 
 
