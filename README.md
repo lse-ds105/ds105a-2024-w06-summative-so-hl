@@ -60,8 +60,7 @@ The following was analysed. The parameters that will be used from the OpenMeteo 
 
 ### Reformatting
 Black (https://black.readthedocs.io/en/stable/) was used to reformat the python files.
+The VS Code reformatter was used to reformat the jupyter notebooks.
 
 ### Author  
 Vienna (So Hoi Ling), Year 1 LSE Econs student
-
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/16Ytx_fz)
